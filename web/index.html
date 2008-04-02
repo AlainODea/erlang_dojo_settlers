@@ -1,0 +1,305 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Settlers of The Dojo Toolkit</title>
+<style type="text/css">
+@import "lib/dijit/themes/soria/soria.css";
+@import "lib/dojo/resources/dojo.css";
+</style>
+<script type="text/javascript" src="lib/dojo/dojo.js" djConfig="parseOnLoad: true, isDebug: true"></script>
+<script type="text/javascript">
+    dojo.require("dojo.parser");
+    dojo.require("dojox.gfx");
+    dojo.addOnLoad(function()
+    {
+        var tokens = [
+            {label:"A", number: 5, pips:"...."},
+            {label:"B", number: 2, pips:"."},
+            {label:"C", number: 6, pips:"......"},
+            {label:"D", number: 3, pips:".."},
+            {label:"E", number: 8, pips:"....."},
+            {label:"F", number:10, pips:".."},
+            {label:"G", number: 9, pips:"...."},
+            {label:"H", number:12, pips:"."},
+            {label:"I", number:11, pips:".."},
+            {label:"J", number: 4, pips:"..."},
+            {label:"K", number: 8, pips:"....."},
+            {label:"L", number:10, pips:"..."},
+            {label:"M", number: 9, pips:"...."},
+            {label:"N", number: 4, pips:"..."},
+            {label:"O", number: 5, pips:"...."},
+            {label:"P", number: 6, pips:"....."},
+            {label:"Q", number: 3, pips:".."},
+            {label:"R", number:11, pips:".."}
+            ];
+        var transparent = dojo.colorFromArray([0,0,0,0]);
+        var hexCounter = 0;
+        var hills = dojo.colorFromString("maroon");
+        var mountains = dojo.colorFromString("gray");
+        var forest = dojo.colorFromString("green");
+        var plains = dojo.colorFromString("yellow");
+        var pastures = dojo.colorFromString("lime");
+        var desert = dojo.colorFromString("red");
+        var terrain = [
+                desert,
+                hills, hills,hills,
+                forest, forest, forest, forest,
+                plains, plains, plains, plains,
+                pastures, pastures, pastures, pastures,
+                mountains, mountains, mountains];
+        var points = [
+            {x:  0, y:-50},
+            {x: 50, y:-25},
+            {x: 50, y: 25},
+            {x:  0, y: 50},
+            {x:-50, y: 25},
+            {x:-50, y:-25},
+            {x:  0, y:-50}];
+        var makeHex = function(surface, base)
+        {
+            var transform = dojox.gfx.matrix.translate(base.x, base.y);
+            var g = surface.createGroup().applyTransform(transform);
+            var dice = Math.round(Math.random()*(terrain.length-1));
+            var terrainType = terrain.splice(dice,1)[0];
+            var hex = g.createPath("M 0 -50 50 -25 50 25 0 50 -50 25 -50 -25")
+                .setFill(terrainType);
+            if (terrainType == desert)
+            {
+                return;
+            }
+            var token = tokens[hexCounter++];
+            g.createCircle({cx: 0, cy: 0, r: 25}).setFill("white").setStroke("gray");
+            var label = g.createText({x: -4, y: -10, text:token.label, align: "start"})
+                .setFill("black");
+            var xOff = -4 * String(token.number).length;
+            var number = g.createText({x: xOff, y: 5, text:token.number, align: "start"})
+                .setFill("black");
+            var xOff = -2 * token.pips.length;
+            var pips = g.createText({x: xOff, y: 15, text:token.pips, align: "start"});
+            if (token.pips.length == 5)
+            {
+                label.setStroke("red").setFill("red");
+                number.setStroke("red").setFill("red");
+                pips.setStroke("red").setFill("red");
+            }
+            else
+            {
+                label.setStroke("black").setFill("black");
+                number.setStroke("black").setFill("black");
+                pips.setStroke("black").setFill("black");
+            }
+            return g;
+        };
+
+        var intersections = [];
+        var makeIntersections = function(g)
+        {
+            dojo.forEach(intersections,
+            function(intersection)
+            {
+                g.applyTransform(dojox.gfx.matrix.translate(intersection.x, intersection.y));
+                var intersectionZone = g.createCircle({cx:0, cy:0, r:16}).setFill("red");
+                // var intersectionZone = g.createPath("M -9 9 9 9 9 -6 0 -9 -9 -6 Z")
+                //                         .setFill("red");
+                intersectionZone.connect("onmouseover",
+                function()
+                {
+                    intersectionZone.setStroke("purple");
+                });
+                intersectionZone.connect("onmouseout",
+                function()
+                {
+                    intersectionZone.setStroke();
+                });
+                var hasSettlement = false;
+                intersectionZone.connect("onclick",
+                function()
+                {
+                    var color = hasSettlement ? transparent : "blue";
+                    intersectionZone.setFill(color);
+                    hasSettlement = !hasSettlement;
+                });
+            });
+        };
+
+        var lineUp =        {line:{x1:0, y1:0, x2:  0, y2:-50},
+                            zone:"M -6 0 6 0 6 -50 -6 -50 Z"};
+        var lineDown =      {line:{x1:0, y1:0, x2:  0, y2: 50},
+                            zone:"M -6 0 6 0 6 50 -6 50 Z"};
+        var lineUpRight =   {line:{x1:0, y1:0, x2: 50, y2:-25},
+                            zone:"M -2 -4 2 4 52 -21 48 -29 Z"};
+        var lineUpLeft =    {line:{x1:0, y1:0, x2:-50, y2:-25},
+                            zone:"M -2 4 2 -4 -48 -29 -52 -21 Z"};
+        var lineDownRight = {line:{x1:0, y1:0, x2: 50, y2: 25},
+                            zone:"M -2 4 2 -4 52 21 48 29 Z"};
+        var lineDownLeft =  {line:{x1:0, y1:0, x2:-50, y2: 25},
+                            zone:"M -2 -4 2 4 -48 29 -52 21 Z"};
+        var makePath = function(surface, base, line, zone)
+        {
+            var transform = dojox.gfx.matrix.translate(base.x, base.y);
+            var g = surface.createGroup().applyTransform(transform);
+            intersections.push({x:base.x, y:base.y});
+            var path = g.createLine(line)
+                    .setStroke({color:"white", style:"None", width:4});
+            var centre = midpoint(line);
+            var pathZone = g.createPath(zone).setFill(transparent);
+            // var pathZone = g.createPath({cx:centre.x,cy:centre.y,r:18})
+            //     .setFill(transparent);
+            var hasPath = false;
+            pathZone.connect("onmouseover",
+            function()
+            {
+                pathZone.setStroke("purple");
+            });
+            pathZone.connect("onmouseout",
+            function()
+            {
+                pathZone.setStroke();
+            });
+            pathZone.connect("onclick",
+            function()
+            {
+                var color = hasPath ? "white" : "blue";
+                path.setStroke({color:color, width:4});
+                hasPath = !hasPath;
+            });
+            base.x += line.x2;
+            base.y += line.y2;
+        };
+
+        var midpoint = function(line)
+        {
+            return {x:(line.x1 + line.x2)/2, y:(line.y1 + line.y2)/2};
+        };
+
+        var right = function(base)
+        {
+            return {x: base.x + 100, y: base.y};
+        };
+
+        var left = function(base)
+        {
+            return {x: base.x - 100, y: base.y};
+        };
+
+        var up = function(base)
+        {
+            return {x: base.x, y: base.y - 100};
+        };
+
+        var down = function(base)
+        {
+            return {x: base.x, y: base.y + 100};
+        };
+
+        var upRight = function(base)
+        {
+            return {x: base.x + 50, y: base.y - 75};
+        };
+
+        var upLeft = function(base)
+        {
+            return {x: base.x - 50, y: base.y - 75};
+        };
+
+        var downRight = function(base)
+        {
+            return {x: base.x + 50, y: base.y + 75};
+        };
+
+        var downLeft = function(base)
+        {
+            return {x: base.x - 50, y: base.y + 75};
+        };
+
+        var makeBoard = function()
+        {
+            var surface = dojox.gfx.createSurface("test", 640, 540);
+            makeHexes(surface);
+            makePaths(surface);
+            makeIntersections(surface);
+        };
+
+        var makeHexes = function(surface)
+        {
+            var base = {x: 200, y: 430};
+            makeHex(surface, base);
+            dojo.forEach([
+                    right, right, upRight, upRight, upLeft,
+                    upLeft, left, left, downLeft, downLeft,
+                    downRight, right, right, upRight, upLeft,
+                    left, downLeft, right],
+            function(transform)
+            {
+                base = transform(base);
+                makeHex(surface, base);
+            });
+        };
+
+        var push = {push:true};
+        var pop = {pop:true};
+        var jump = function(operation)
+        {
+            var line = operation.line;
+            return {jump: true, jumpX: line.x2, jumpY: line.y2};
+        };
+        var makePaths = function(surface)
+        {
+            var base = {x: 250, y: 405};
+            var bases = [base];
+            dojo.forEach([
+                    lineUpLeft, lineDownLeft, lineDown, lineDownRight,
+                    lineUpRight, lineUp, lineUpRight, lineDownRight,
+                    lineDown, push, lineDownLeft, lineUpLeft, pop,
+                    lineDownRight, lineUpRight, lineUp, push, lineUpLeft,
+                    lineDownLeft, pop, lineUpRight, lineUp, push,
+                    lineUpLeft, lineDownLeft, lineDown, pop, lineUpRight,
+                    lineUp, lineUpLeft, push, lineDownLeft, lineDown, pop,
+                    lineUp, lineUpLeft, push, lineDownLeft, lineDown,
+                    lineDownRight, pop, lineUp, lineUpLeft, lineDownLeft,
+                    push, lineDown, lineDownRight, pop, lineUpLeft,
+                    lineDownLeft, push, lineDown, lineDownRight, lineUpRight,
+                    pop, lineUpLeft, lineDownLeft, lineDown, push,
+                    lineDownRight, lineUpRight, pop, lineDownLeft, lineDown,
+                    push, lineDownRight, lineUpRight, lineUp, pop,
+                    lineDownLeft, lineDown, lineDownRight, push,
+                    lineUpRight, lineUp, pop, lineDown, lineDownRight,
+                    jump(lineUpRight), lineUp, push, lineUpLeft, pop,
+                    lineUpRight, lineDownRight, push, lineDown, pop,
+                    lineUpRight, push, lineDownRight, pop, lineUp, push,
+                    lineUpRight, pop, lineUpLeft, push, lineUp, pop,
+                    lineDownLeft, push, lineUpLeft, pop, lineDown],
+            function(operation)
+            {
+                if (operation.push)
+                {
+                    bases.push({x:base.x, y:base.y});
+                }
+                else if (operation.pop)
+                {
+                    base = bases.pop();
+                }
+                else if (operation.jump)
+                {
+                    base.x += operation.jumpX;
+                    base.y += operation.jumpY;
+                }
+                else
+                {
+                    makePath(surface, base, operation.line, operation.zone);
+                }
+            });
+        };
+
+        makeBoard();
+        dojo.setSelectable(dojo.byId("test"), false);
+    });
+</script>
+</head>
+<body class="soria">
+<h1>Settlers of The Dojo Toolkit</h1>
+<div id="test" style="background:lightgrey"></div>
+</body>
+<html>

@@ -1,0 +1,23 @@
+Settlers of Catan
+=================
+
+ProbabilityMarkers = {?}
+WaterTypes  = {water, threeToOne, grain, brick, lumber, wool, ore}
+HexTypes    = {desert, grain, brick, lumber, wool, ore}
+VertexTypes = {empty, settlement, city}
+EdgeTypes   = {empty, road}
+
+Every Hex except for the desert has a Probability Marker.
+Every Hex touches 6 Vertices and 6 Edges.
+Every Vertex touches 3 Hexes and 3 Edges.
+Every Edge touches 2 Hexes and 2 Vertices.
+Every Edge has 0 or 1 Roads.
+Every Vertex is occupied by Nothing, a Settlement, or a City.
+Every Player has 4 Cities, 6 Settlements, and 10 Roads.
+
+What about stockpiles of resources?
+What about Victory Points?
+What about Longest Road?
+What about Largest Army?
+What about Soldiers?
+What about Year of Plenty, Monopoly, etc.?
