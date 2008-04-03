@@ -12,46 +12,12 @@ test() ->
     Paths = make_n(path, 6),
     Intersections = make_n(intersection, 6),
     OpenReceiver = spawn(fun() -> true end),
-    lists:map(
-        fun(Intersection) ->
-            assert(Intersection, {waiting, for, [{path, 3}, {intersection, 3}]})
-        end, Intersections),
-    lists:foldl(
-        fun(Path, [AnIntersection1,AnIntersection2|AnIntersections]) ->
-            assert(Path, {waiting, for, [{intersection, 2}]}),
-            Path ! {intersection, AnIntersection1},
-            AnIntersection1 ! {path, Path},
-            AnIntersection1 ! {intersection, AnIntersection2},
-            assert(Path, {waiting, for, [{intersection, 1}]}),
-            Path ! {intersection, AnIntersection2},
-            AnIntersection2 ! {path, Path},
-            AnIntersection2 ! {intersection, AnIntersection1},
-            assert(Path, disconnected),
-            [AnIntersection2|AnIntersections];
-        (Path, [AnIntersection1]) ->
-            [AnIntersection2|_] = Intersections,
-            Path ! {intersection, AnIntersection1},
-            AnIntersection1 ! {path, Path},
-            AnIntersection1 ! {intersection, AnIntersection2},
-            assert(Path, {waiting, for, [{intersection, 1}]}),
-            Path ! {intersection, AnIntersection2},
-            AnIntersection2 ! {path, Path},
-            AnIntersection2 ! {intersection, AnIntersection1},
-            assert(Path, disconnected),
-            []
-        end,
-        Intersections,
-        Paths),
-    lists:map(
-        fun(Intersection) ->
-            assert(Intersection, {waiting, for,
-                [{path, 1}, {intersection, 1}]}),
-            Intersection ! {path, OpenReceiver},
-            assert(Intersection, {waiting, for, [{intersection, 1}]}),
-            Intersection ! {intersection, OpenReceiver},
-            assert(Intersection, disconnected),
-            Hex ! {intersection, Intersection}
-        end, Intersections),
+    test(Hex, Stockpile, Paths, Intersections, OpenReceiver).
+
+test(Hex, Stockpile, Paths, Intersections, OpenReceiver) ->
+    testInitialIntersectionState(Intersections),
+    testHookUpPathsAndIntersections(Intersections, Paths),
+    testHookUpHexAndIntersections(Hex, Intersections, OpenReceiver),
     assert(Hex, hex),
     Hex ! produce,
     [Intersection1,_,Intersection3|_] = Intersections,
@@ -115,6 +81,52 @@ test() ->
         {lumber, 0}, {brick, 0}, {grain, 0}, {wool, 0}, {ore, 0}
     ]}),
     true.
+
+testInitialIntersectionState(Intersections) ->
+    lists:map(
+        fun(Intersection) ->
+            assert(Intersection, {waiting, for, [{path, 3}, {intersection, 3}]})
+        end, Intersections).
+
+testHookUpPathsAndIntersections(Intersections, Paths) ->
+    lists:foldl(
+        fun(Path, [AnIntersection1,AnIntersection2|AnIntersections]) ->
+            assert(Path, {waiting, for, [{intersection, 2}]}),
+            Path ! {intersection, AnIntersection1},
+            AnIntersection1 ! {path, Path},
+            AnIntersection1 ! {intersection, AnIntersection2},
+            assert(Path, {waiting, for, [{intersection, 1}]}),
+            Path ! {intersection, AnIntersection2},
+            AnIntersection2 ! {path, Path},
+            AnIntersection2 ! {intersection, AnIntersection1},
+            assert(Path, disconnected),
+            [AnIntersection2|AnIntersections];
+        (Path, [AnIntersection1]) ->
+            [AnIntersection2|_] = Intersections,
+            Path ! {intersection, AnIntersection1},
+            AnIntersection1 ! {path, Path},
+            AnIntersection1 ! {intersection, AnIntersection2},
+            assert(Path, {waiting, for, [{intersection, 1}]}),
+            Path ! {intersection, AnIntersection2},
+            AnIntersection2 ! {path, Path},
+            AnIntersection2 ! {intersection, AnIntersection1},
+            assert(Path, disconnected),
+            []
+        end,
+        Intersections,
+        Paths).
+
+testHookUpHexAndIntersections(Hex, Intersections, OpenReceiver) ->
+    lists:map(
+        fun(Intersection) ->
+            assert(Intersection, {waiting, for,
+                [{path, 1}, {intersection, 1}]}),
+            Intersection ! {path, OpenReceiver},
+            assert(Intersection, {waiting, for, [{intersection, 1}]}),
+            Intersection ! {intersection, OpenReceiver},
+            assert(Intersection, disconnected),
+            Hex ! {intersection, Intersection}
+        end, Intersections).
 
 assert(Actor, Status) ->
     case status:check(Actor) of
