@@ -42,7 +42,7 @@ hex(Intersections, ResourceType) ->
     {robber, arrives} ->
         blocked(Intersections, ResourceType);
     {From, status} when is_pid(From) ->
-        From ! hex,
+        From ! {hex, ResourceType},
         hex(Intersections, ResourceType);
     _ ->
         hex(Intersections, ResourceType)
