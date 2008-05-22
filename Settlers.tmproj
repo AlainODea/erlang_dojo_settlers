@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>src/actor.erl</string>
+	<string>src/server.erl</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -51,48 +51,6 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>src/actor.erl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>6</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>src/center_perimeter.erl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>12</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>0</integer>
-		</dict>
-		<key>src/hex.erl</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>48</integer>
-				<key>line</key>
-				<integer>31</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>22</integer>
-		</dict>
 		<key>src/intersection.erl</key>
 		<dict>
 			<key>caret</key>
@@ -121,47 +79,47 @@
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>src/player.erl</key>
+		<key>src/resource.erl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>22</integer>
+				<integer>16</integer>
 				<key>line</key>
-				<integer>22</integer>
+				<integer>3</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
 		</dict>
-		<key>src/stockpile.erl</key>
+		<key>src/server.erl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>50</integer>
+				<integer>84</integer>
 				<key>line</key>
-				<integer>135</integer>
+				<integer>17</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>114</integer>
+			<integer>24</integer>
 		</dict>
-		<key>test/test_game.erl</key>
+		<key>src/special_intersections.erl</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>39</integer>
+				<integer>43</integer>
 				<key>line</key>
-				<integer>36</integer>
+				<integer>12</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>97</integer>
+			<integer>0</integer>
 		</dict>
 		<key>test/test_hex.erl</key>
 		<dict>
@@ -194,13 +152,31 @@
 	</dict>
 	<key>openDocuments</key>
 	<array>
-		<string>src/actor.erl</string>
-		<string>test/test_game.erl</string>
-		<string>src/center_perimeter.erl</string>
+		<string>src/server.erl</string>
+		<string>src/resource.erl</string>
+	</array>
+	<key>shellVariables</key>
+	<array>
+		<dict>
+			<key>enabled</key>
+			<true/>
+			<key>value</key>
+			<string>src</string>
+			<key>variable</key>
+			<string>TM_ERLANG_SRC</string>
+		</dict>
+		<dict>
+			<key>enabled</key>
+			<true/>
+			<key>value</key>
+			<string>ebin</string>
+			<key>variable</key>
+			<string>TM_ERLANG_BIN</string>
+		</dict>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{434, 142}, {643, 860}}</string>
+	<string>{{434, 120}, {723, 882}}</string>
 </dict>
 </plist>
