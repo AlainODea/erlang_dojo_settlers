@@ -2,14 +2,7 @@
 -author('alain.odea@gmail.com').
 -license('request://opensource.org/licenses/afl-3.0.php').
 -export([start/0]).
--record(request, {
-    next,
-    respond,
-    method,
-    uri,
-    headers=[],
-    protocol
-}).
+-include("request.hrl").
 
 start() ->
     {ok, Listen} = gen_tcp:listen(8008, [list, {packet, line},
@@ -22,6 +15,7 @@ respond(Socket, Status, Response)
     gen_tcp:send(Socket, io_lib:format("HTTP/1.1 ~s\r\n", [Status])),
     gen_tcp:send(Socket, io_lib:format("Content-Length: ~p\r\n", [length(Response)])),
     gen_tcp:send(Socket, "Content-Type: text/plain\r\n"),
+    gen_tcp:send(Socket, "Set-Cookie: session=1; path=/; domain=.familyodea.com\r\n"),
     gen_tcp:send(Socket, "\r\n"),
     gen_tcp:send(Socket, Response);
 respond(Socket, Status, _) when is_list(Status) ->
@@ -52,8 +46,10 @@ par_connect(Listen) ->
         waiting(Req)
     catch
     _:Msg ->
-        io:format("~p~n", [erlang:get_stacktrace()]),
-        respond(Socket, "500 Internal Server Error", Msg)
+        Stack = erlang:get_stacktrace(),
+        io:format("~s~n~p~n", [Msg, Stack]),
+        respond(Socket, "500 Internal Server Error", Msg),
+        erlang:raise({Msg, Stack})
     end.
 
 waiting(Req) ->
@@ -66,22 +62,25 @@ request_line(Req, _) ->
     io:format("Malformed request:  bad request line~n"),
     (Req#request.respond)(badRequest, "Bad request line\r\n").
 
-headers_nohost(Req, {ok, [[]]}) ->
+headers_nohost(#request{respond=Respond}, {ok, [[]]}) ->
     io:format("Malformed request: missing Host header~n"),
-    (Req#request.respond)(badRequest, "Missing Host header\r\n");
-headers_nohost(Req, {ok, ["Host", Host]}) ->
-    headers(Req#request{headers=[{"Host", Host}|Req#request.headers]},
-        regexp:split((Req#request.next)(), ":\s*"));
-headers_nohost(Req, {ok, [Name, Value]}) ->
-    headers_nohost(Req#request{headers=[{Name, Value}|Req#request.headers]},
-        regexp:split((Req#request.next)(), ":\s*")).
+    Respond(badRequest, "Missing Host header\r\n");
+headers_nohost(#request{headers=Headers, next=Next} = Req, {ok, ["Host", Host]}) ->
+    headers(Req#request{headers=[{"Host", Host}|Headers]},
+        regexp:split(Next(), ":\s*"));
+headers_nohost(#request{headers=Headers, next=Next}=Req, {ok, [Name, Value]}) ->
+    headers_nohost(Req#request{headers=[{Name, Value}|Headers]},
+        regexp:split(Next(), ":\s*"));
+headers_nohost(#request{respond=Respond}, BadFormat) ->
+    io:format("Could not understand ~s~n", [BadFormat]),
+    Respond(badRequest, "Could not understand header line\r\n").
 
 headers(Req, {ok, [[]]}) ->
     #request{uri=URI, headers=Headers, method=Method} = Req,
     io:format("Request: URI:~p Headers:~p Method:~p~n", [
         URI, Headers, Method]),
     io:format("Request done, responding~n"),
-    case resource:uri(URI) of
+    case resource:request(Req) of
     {found, Resource} ->
         (Req#request.respond)(ok, Resource);
     _ ->
@@ -89,4 +88,7 @@ headers(Req, {ok, [[]]}) ->
     end;
 headers(Req, {ok, [Name, Value]}) ->
     headers(Req#request{headers=[{Name, Value}|Req#request.headers]},
-        regexp:split((Req#request.next)(), ":\s+")).
+        regexp:split((Req#request.next)(), ":\s+"));
+headers(#request{respond=Respond}, BadFormat) ->
+    io:format("Could not understand ~s~n", [BadFormat]),
+    Respond(badRequest, "Could not understand header line\r\n").
