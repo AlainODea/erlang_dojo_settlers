@@ -1,5 +1,6 @@
 .DS_Store
 .hg
 .hgignore
+doc
 *.beam
 *.out
