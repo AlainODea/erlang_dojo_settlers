@@ -4,13 +4,12 @@
 -export([connect/2]).
 
 connect(Hexes, Intersections) ->
-    {ok, SpecialIntersections} = file:consult(special_intersections),
     lists:map(
         fun({intersection,IntersectionNum,hexes,HexNums}) ->
-            Intersection = lists:nth(IntersectionNum, Intersections),
-            lists:map(
-                fun(HexNum) ->
-                    lists:nth(HexNum, Hexes) ! {intersection, Intersection}
-                end, HexNums)
-        end, SpecialIntersections),
+            Intersection = lists:nth(IntersectionNum+1, Intersections),
+            [lists:nth(HexNum+1, Hexes) ! {intersection, Intersection} || HexNum <- HexNums]
+        end, config()),
     true.
+
+config() ->
+    [{intersection,29,hexes,[11, 0]}].

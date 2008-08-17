@@ -3,10 +3,12 @@
 -license('http://opensource.org/licenses/afl-3.0.php').
 -export([connect/2]).
 
-connect(Hexes, Intersections) ->
-    connect1([lists:last(Hexes)|Hexes], Intersections).
+connect(Hexes, [FirstIntersection|_] = Intersections) ->
+    LastHex = connect1(Hexes, Intersections),
+    LastHex ! {intersection, FirstIntersection}.
 
-connect1([Hex1,Hex2|Hexes], [Intersection|Intersections]) ->
-    Hex1 ! {intersection, Intersection},
-    Hex2 ! {intersection, Intersection},
-    connect1(Hexes, Intersections).
+connect1([LastHex], [_LastIntersection]) -> LastHex;
+connect1([Hex|Hexes], [I1,I2|Intersections]) ->
+    Hex ! {intersection, I1},
+    Hex ! {intersection, I2},
+    connect1(Hexes, [I2|Intersections]).

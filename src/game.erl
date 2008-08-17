@@ -1,36 +1,33 @@
 -module(game).
 -author('alain.odea@gmail.com').
 -license('http://opensource.org/licenses/afl-3.0.php').
--export([new/0]).
+-export([start/0]).
 
-new() ->
-    Hexes = make_hexes(),
-    Intersections = make_intersections(),
-    Paths = make_paths(),
-    {OuterHexes, InnerHexes} = lists:split(12, Hexes),
-    outer_perimeter:connect(OuterHexes, Intersections),
-    InnerIntersections = lists:nthtail(30, Intersections),
-    inner_perimeter:connect(OuterHexes, InnerIntersections),
-    {MiddleHexes, [CenterHex]} = lists:split(6, InnerHexes),
-    outer_perimeter:connect(MiddleHexes, InnerIntersections),
-    CenterIntersections = lists:nthtail(18, InnerIntersections),
+start() ->
+    OuterHexes = startn(12, hex),
+    OuterIntersections = startn(30, intersection),
+    outer_perimeter:connect(OuterHexes, OuterIntersections),
+    MiddleIntersections = startn(18, intersection),
+    inner_perimeter:connect(OuterHexes, MiddleIntersections),
+    MiddleHexes = startn(6, hex),
+    outer_perimeter:connect(MiddleHexes, MiddleIntersections),
+    CenterIntersections = startn(6, intersection),
     center_perimeter:connect(MiddleHexes, CenterIntersections),
-    lists:map(
-        fun(Intersection) ->
-            CenterHex ! {intersection, Intersection}
-        end, CenterIntersections),
-    special_intersections:connect(Hexes, Intersections),
-    special_paths:connect(Hexes, Intersections),
-    Players = make_players(),
+    CenterHex = hex:start(),
+    [CenterHex ! {intersection, Intersection} || Intersection <- CenterIntersections],
+    Intersections = lists:append([OuterIntersections, MiddleIntersections, CenterIntersections]),
+    WalkablePaths = walkable_paths:build(Intersections),
+    SpecialPaths = special_paths:build(Intersections),
+    % TODO: need random way of choosing the desert hex
+    % TODO: need way of randomly dealing out terrain types onto hexes
     Robber = CenterHex,
+    Hexes = lists:append([OuterHexes, MiddleHexes, CenterHex]),
+    special_intersections:connect(Hexes, Intersections),
+    Players = [player:start() || _ <- lists:seq(1, 4)],
+    Paths = WalkablePaths ++ SpecialPaths,
     spawn(fun() -> turn(Players, Hexes, Intersections, Paths, Robber) end).
 
-make_players()       -> make_n(player,         4).
-make_hexes()         -> make_n(hex,           35).
-make_intersections() -> make_n(intersection,  54).
-make_paths()         -> make_n(path,         117).
-
-make_n(Actor, N) -> lists:map(fun(_) -> Actor:new() end, lists:seq(1, N)).
+startn(N, Mod) -> [Mod:start() || _ <- lists:seq(1, N)].
 
 turn([CurrentPlayer|OtherPlayers], Hexes, Intersections, Paths, Robber) ->
     production(CurrentPlayer, Hexes, Robber),

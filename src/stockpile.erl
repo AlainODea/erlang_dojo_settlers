@@ -1,7 +1,7 @@
 -module(stockpile).
 -author('alain.odea@gmail.com').
 -license('http://opensource.org/licenses/afl-3.0.php').
--export([new/0]).
+-export([start/0]).
 
 % RPC API
 -export([build_road/1,
@@ -30,7 +30,7 @@ build(Stockpile, Buildable) ->
         false
     end.
 
-new() ->
+start() ->
     spawn(fun() -> stockpile(0, 0, 0, 0, 0) end).
 
 stockpile(L, B, G, W, O) ->

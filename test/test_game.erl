@@ -7,8 +7,8 @@ run() ->
     test().
 
 test() ->
-    Hex = hex:new(),
-    Stockpile = stockpile:new(),
+    Hex = hex:start(),
+    Stockpile = stockpile:start(),
     Paths = make_n(path, 6),,
     Intersections = make_n(intersection, 6),
     OpenReceiver = spawn(fun() -> true end),
@@ -139,4 +139,4 @@ assert(Actor, Status) ->
     BadStatus -> throw({expect, Status, was, BadStatus})
     end.
 
-make_n(Actor, N) -> [Actor:new() || _ <- lists:seq(1, N)].
+make_n(Actor, N) -> [Actor:start() || _ <- lists:seq(1, N)].

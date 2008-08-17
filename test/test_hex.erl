@@ -4,7 +4,7 @@
 -export([run/0]).
 
 run() ->
-    Hex = hex:new(),
+    Hex = hex:start(),
     testInitialState(Hex).
 
 assert(Actor, Status) ->

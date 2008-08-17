@@ -3,14 +3,25 @@
 -license('http://opensource.org/licenses/afl-3.0.php').
 -export([connect/2]).
 
-connect(Hexes, Intersections) ->
-    connect(2, [lists:last(Hexes)|Hexes], Intersections).
+connect(Hexes, [FirstIntersection|_] = Intersections) ->
+    LastHex = connecteven(Hexes, Intersections),
+    LastHex ! {intersection, FirstIntersection}.
 
-connect(_, [], _) -> done;
-connect(0, [Hex|Hexes], [Intersection|Intersections]) ->
-    Hex ! {intersection, Intersection},
-    connect(2, Hexes, Intersections);
-connect(N, [Hex1,Hex2|Hexes], [Intersection|Intersections]) ->
-    Hex1 ! {intersection, Intersection},
-    Hex2 ! {intersection, Intersection},
-    connect(N-1, Hexes, Intersections).
+% an even hex needs its inner edges connected to two intersections
+connecteven([Hex|Hexes], [I1,I2|Intersections]) ->
+    Hex ! {intersection, I1},
+    Hex ! {intersection, I2},
+    connectodd(Hexes, [I2|Intersections]).
+
+% the last hex needs to be connected to three intersections,
+% but the third intersection here is the first intersection overall
+connectodd([Hex], [I1,I2|_]) ->
+    Hex ! {intersection, I1},
+    Hex ! {intersection, I2},
+    Hex;
+% an odd hex needs its inner edges connected to three intersections
+connectodd([Hex|Hexes], [I1,I2,I3|Intersections]) ->
+    Hex ! {intersection, I1},
+    Hex ! {intersection, I2},
+    Hex ! {intersection, I3},
+    connecteven(Hexes, [I3|Intersections]).

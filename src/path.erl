@@ -1,9 +1,9 @@
 -module(path).
 -author('alain.odea@gmail.com').
 -license('http://opensource.org/licenses/afl-3.0.php').
--export([new/0]).
+-export([start/0]).
 
-new() ->
+start() ->
     spawn(fun waiting/0).
 
 waiting() ->

@@ -21,31 +21,31 @@ testProduction(N) ->
     testOre(N).
 
 testLumber(N) ->
-    Stockpile = stockpile:new(),
+    Stockpile = stockpile:start(),
     assert(Stockpile, {stockpile, [{lumber, 0}, {brick, 0}, {grain, 0}, {wool, 0}, {ore, 0}]}),
     Stockpile ! {produce, lumber, N},
     assert(Stockpile, {stockpile, [{lumber, N}, {brick, 0}, {grain, 0}, {wool, 0}, {ore, 0}]}).
 
 testBrick(N) ->
-    Stockpile = stockpile:new(),
+    Stockpile = stockpile:start(),
     assert(Stockpile, {stockpile, [{lumber, 0}, {brick, 0}, {grain, 0}, {wool, 0}, {ore, 0}]}),
     Stockpile ! {produce, brick, N},
     assert(Stockpile, {stockpile, [{lumber, 0}, {brick, N}, {grain, 0}, {wool, 0}, {ore, 0}]}).
 
 testGrain(N) ->
-    Stockpile = stockpile:new(),
+    Stockpile = stockpile:start(),
     assert(Stockpile, {stockpile, [{lumber, 0}, {brick, 0}, {grain, 0}, {wool, 0}, {ore, 0}]}),
     Stockpile ! {produce, grain, N},
     assert(Stockpile, {stockpile, [{lumber, 0}, {brick, 0}, {grain, N}, {wool, 0}, {ore, 0}]}).
 
 testWool(N) ->
-    Stockpile = stockpile:new(),
+    Stockpile = stockpile:start(),
     assert(Stockpile, {stockpile, [{lumber, 0}, {brick, 0}, {grain, 0}, {wool, 0}, {ore, 0}]}),
     Stockpile ! {produce, wool, N},
     assert(Stockpile, {stockpile, [{lumber, 0}, {brick, 0}, {grain, 0}, {wool, N}, {ore, 0}]}).
 
 testOre(N) ->
-    Stockpile = stockpile:new(),
+    Stockpile = stockpile:start(),
     assert(Stockpile, {stockpile, [{lumber, 0}, {brick, 0}, {grain, 0}, {wool, 0}, {ore, 0}]}),
     Stockpile ! {produce, ore, N},
     assert(Stockpile, {stockpile, [{lumber, 0}, {brick, 0}, {grain, 0}, {wool, 0}, {ore, N}]}).

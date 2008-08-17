@@ -1,9 +1,9 @@
 -module(intersection).
 -author('alain.odea@gmail.com').
 -license('http://opensource.org/licenses/afl-3.0.php').
--export([new/0]).
+-export([start/0]).
 
-new() ->
+start() ->
     % create an intersection waiting for
     % 3 intersections and 3 paths
     spawn(fun() -> waiting(3, 3, [], []) end).

@@ -1,9 +1,9 @@
 -module(player).
 -author('alain.odea@gmail.com').
 -license('http://opensource.org/licenses/afl-3.0.php').
--export([new/0]).
+-export([start/0]).
 
-new() -> spawn(fun() -> player(stockpile:new()) end).
+start() -> spawn(fun() -> player(stockpile:start()) end).
 
 player(Stockpile) ->
     receive
