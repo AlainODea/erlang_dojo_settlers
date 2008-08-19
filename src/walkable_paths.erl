@@ -1,8 +1,14 @@
 -module(walkable_paths).
 -export([build/1]).
 
-build([_LastIntersection]) -> [];
-build([I1,I2|Intersections]) ->
+build([FirstIntersection|_] = Intersections) ->
+    LastIntersection = build1(Intersections),
+    Path = path:start(),
+    LastIntersection ! {path, Path},
+    FirstIntersection ! {path, Path}.
+
+build1([LastIntersection]) -> LastIntersection;
+build1([I1,I2|Intersections]) ->
     Path = path:start(),
     I1 ! {path, Path},
     I2 ! {path, Path},

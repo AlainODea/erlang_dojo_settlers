@@ -4,24 +4,16 @@
 -export([connect/2]).
 
 connect(Hexes, [FirstIntersection|_] = Intersections) ->
-    LastHex = connecteven(Hexes, Intersections),
+    LastHex = connect2(Hexes, [lists:last(Intersections)|Intersections]),
     LastHex ! {intersection, FirstIntersection}.
 
-% an even hex needs its inner edges connected to two intersections
-connecteven([Hex|Hexes], [I1,I2|Intersections]) ->
-    Hex ! {intersection, I1},
-    Hex ! {intersection, I2},
-    connectodd(Hexes, [I2|Intersections]).
+connect2([Hex|Hexes],[I1,I2|Intersections]) ->
+    [Hex ! {intersection, I} || I <- [I1, I2]],
+    connect3(Hexes, [I2,Intersections]).
 
-% the last hex needs to be connected to three intersections,
-% but the third intersection here is the first intersection overall
-connectodd([Hex], [I1,I2|_]) ->
-    Hex ! {intersection, I1},
-    Hex ! {intersection, I2},
-    Hex;
-% an odd hex needs its inner edges connected to three intersections
-connectodd([Hex|Hexes], [I1,I2,I3|Intersections]) ->
-    Hex ! {intersection, I1},
-    Hex ! {intersection, I2},
-    Hex ! {intersection, I3},
-    connecteven(Hexes, [I3|Intersections]).
+connect3([LastHex], [I1,I2]) ->
+    [LastHex ! {intersection, I} || I <- [I1, I2]],
+    LastHex;
+connect3([Hex|Hexes],[I1,I2,I3|Intersections]) ->
+    [Hex ! {intersection, I} || I <- [I1, I2, I3]],
+    connect2(Hexes, [I3,Intersections]).

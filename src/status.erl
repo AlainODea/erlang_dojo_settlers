@@ -8,4 +8,5 @@ check(Pid) when is_pid(Pid) ->
     receive
     Status -> Status
     after 100 -> timeout
-    end.
+    end;
+check([Pid|Pids]) -> [check(Pid)|check(Pids)].

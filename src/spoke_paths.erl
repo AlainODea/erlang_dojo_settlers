@@ -1,6 +1,6 @@
-%% handles special case paths that are not covered by the
-%% general walking algorithm
--module(special_paths).
+%% handles spoke paths that connect from ring to ring
+%% TODO: this can be done algorithmically (some kind of repeating series)
+-module(spoke_paths).
 -author('alain.odea@gmail.com').
 -license('http://opensource.org/licenses/afl-3.0.php').
 -export([build/1]).
@@ -26,12 +26,12 @@ build([#path{from=A,to=B}|Config], Intersections) ->
 
 config() ->
     [
-     #path{from=29,to= 0},
-     #path{from=31,to= 2},
-     #path{from=33,to= 4},
-     #path{from=34,to= 7},
-     #path{from=36,to= 9},
-     #path{from=37,to=12},
+     #path{from= 1,to=33},
+     #path{from= 6,to=35},
+     #path{from= 9,to=36},
+     #path{from=11,to=38},
+     #path{from=14,to=39},
+     #path{from=12,to=12},
      #path{from=39,to=14},
      #path{from=40,to=17},
      #path{from=42,to=19},

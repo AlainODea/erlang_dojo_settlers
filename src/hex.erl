@@ -1,21 +1,18 @@
 -module(hex).
 -author('alain.odea@gmail.com').
 -license('http://opensource.org/licenses/afl-3.0.php').
--export([start/0]).
-
-start() ->
-    % TODO: create a registry process to generate terrain type
-    start(lumber).
+-export([start/1]).
 
 % argument value checking
 % disallow unsupported resource types
-start(lumber) -> new1(lumber);
-start(brick)  -> new1(brick);
-start(grain)  -> new1(grain);
-start(wood)   -> new1(wood);
-start(ore)    -> new1(ore).
+start(lumber)  -> start1(lumber);
+start(brick)   -> start1(brick);
+start(grain)   -> start1(grain);
+start(wool)    -> start1(wool);
+start(ore)     -> start1(ore);
+start(desert)  -> start1(desert).
 
-new1(ResourceType) ->
+start1(ResourceType) ->
     % create a hex which is waiting for six intersections
     spawn(fun() -> waiting(6, [], ResourceType) end).
 
@@ -33,6 +30,7 @@ waiting(N, Intersections, ResourceType) ->
         exit({badMsg, BadMsg})
     end.
 
+hex(_, desert) -> desert();
 hex(Intersections, ResourceType) ->
     receive
     produce ->
@@ -56,4 +54,12 @@ blocked(Intersections, ResourceType) ->
         blocked(Intersections, ResourceType);
     _ ->
         blocked(Intersections, ResourceType)
+    end.
+
+desert() ->
+    receive
+    {From, status} when is_pid(From) ->
+        From ! desert,
+        desert();
+    _ -> desert()
     end.
