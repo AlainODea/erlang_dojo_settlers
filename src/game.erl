@@ -8,11 +8,12 @@ start() ->
     OuterHexes = hex_factory:hexes(12, HexFactory),
     OuterIntersections = startn(30, intersection),
     outer_perimeter:connect(OuterHexes, OuterIntersections),
+    shoreline:connect(OuterIntersections),
     OuterPaths = walkable_paths:build(OuterIntersections),
     MiddleIntersections = startn(18, intersection),
     inner_perimeter:connect(OuterHexes, MiddleIntersections),
     MiddleHexes = hex_factory:hexes(6, HexFactory),
-    outer_perimeter:connect(MiddleHexes, MiddleIntersections),
+    middle_perimeter:connect(MiddleHexes, MiddleIntersections),
     MiddlePaths = walkable_paths:build(MiddleIntersections),
     CenterIntersections = startn(6, intersection),
     center_perimeter:connect(MiddleHexes, CenterIntersections),
@@ -20,13 +21,13 @@ start() ->
     CenterHex = hex_factory:hex(HexFactory),
     [CenterHex ! {intersection, Intersection} || Intersection <- CenterIntersections],
     Intersections = lists:append([OuterIntersections, MiddleIntersections, CenterIntersections]),
-    SpecialPaths = special_paths:build(Intersections),
+    SpokePaths = spoke_paths:build(OuterIntersections, MiddleIntersections, CenterIntersections),
     % TODO: need random way of choosing the desert hex
     % TODO: need way of randomly dealing out terrain types onto hexes
     Robber = CenterHex,
-    Hexes = lists:append([OuterHexes, MiddleHexes, CenterHex]),
+    Hexes = lists:append([OuterHexes, MiddleHexes, [CenterHex]]),
     Players = [player:start() || _ <- lists:seq(1, 4)],
-    Paths = lists:append([OuterPaths, MiddlePaths, CenterPaths, SpecialPaths]),
+    Paths = lists:append([OuterPaths, MiddlePaths, CenterPaths, SpokePaths]),
     spawn(fun() -> turn(Players, Hexes, Intersections, Paths, Robber) end).
 
 startn(N, Mod) -> [Mod:start() || _ <- lists:seq(1, N)].

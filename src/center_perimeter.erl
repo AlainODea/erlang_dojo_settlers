@@ -7,7 +7,9 @@ connect(Hexes, [FirstIntersection|_] = Intersections) ->
     LastHex = connect1(Hexes, Intersections),
     LastHex ! {intersection, FirstIntersection}.
 
-connect1([LastHex], [_LastIntersection]) -> LastHex;
+connect1([LastHex], [LastIntersection]) ->
+    LastHex ! {intersection, LastIntersection},
+    LastHex;
 connect1([Hex|Hexes], [I1,I2|Intersections]) ->
     Hex ! {intersection, I1},
     Hex ! {intersection, I2},

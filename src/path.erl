@@ -1,7 +1,17 @@
 -module(path).
 -author('alain.odea@gmail.com').
 -license('http://opensource.org/licenses/afl-3.0.php').
--export([start/0]).
+-export([between/2,start/0]).
+
+between(I1, I2) when is_pid(I1), is_pid(I2) ->
+    Path = start(),
+    I1 ! {path, Path},
+    I2 ! {path, Path},
+    I1 ! {intersection, I2},
+    I2 ! {intersection, I1},
+    Path ! {intersection, I1},
+    Path ! {intersection, I2},
+    Path.
 
 start() ->
     spawn(fun waiting/0).
