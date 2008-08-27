@@ -29,9 +29,14 @@ start() ->
     Players = [player:start() || _ <- lists:seq(1, 4)],
     Paths = lists:append([OuterPaths, MiddlePaths, CenterPaths, SpokePaths]),
     HexNumbering = hex_numbers:assign(Hexes),
-    spawn(fun() -> turn(Players, HexNumbering, Intersections, Paths, Robber) end).
+    spawn(fun() -> game(Players, HexNumbering, Intersections, Paths, Robber) end).
 
 startn(N, Mod) -> [Mod:start() || _ <- lists:seq(1, N)].
+
+game(Players, HexNumbering, Intersections, Paths, Robber) ->
+    {A1, A2, A3} = now(),
+    random:seed(A1, A2, A3),
+    turn(Players, HexNumbering, Intersections, Paths, Robber).
 
 turn([CurrentPlayer|OtherPlayers], HexNumbering, Intersections, Paths, Robber) ->
     production(CurrentPlayer, HexNumbering, Robber),
