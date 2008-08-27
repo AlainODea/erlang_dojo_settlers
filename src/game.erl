@@ -28,24 +28,27 @@ start() ->
     Hexes = lists:append([OuterHexes, MiddleHexes, [CenterHex]]),
     Players = [player:start() || _ <- lists:seq(1, 4)],
     Paths = lists:append([OuterPaths, MiddlePaths, CenterPaths, SpokePaths]),
-    spawn(fun() -> turn(Players, Hexes, Intersections, Paths, Robber) end).
+    HexNumbering = hex_numbers:assign(Hexes),
+    spawn(fun() -> turn(Players, HexNumbering, Intersections, Paths, Robber) end).
 
 startn(N, Mod) -> [Mod:start() || _ <- lists:seq(1, N)].
 
-turn([CurrentPlayer|OtherPlayers], Hexes, Intersections, Paths, Robber) ->
-    production(CurrentPlayer, Hexes, Robber),
+turn([CurrentPlayer|OtherPlayers], HexNumbering, Intersections, Paths, Robber) ->
+    production(CurrentPlayer, HexNumbering, Robber),
     trading(CurrentPlayer),
     building(CurrentPlayer),
-    turn(OtherPlayers ++ CurrentPlayer, Hexes, Robber, Intersections, Paths).
+    turn(OtherPlayers ++ CurrentPlayer, HexNumbering, Robber, Intersections, Paths).
 
-production(CurrentPlayer, Hexes, Robber) ->
+production(CurrentPlayer, HexNumbering, Robber) ->
     Dice = random:uniform(6) + random:uniform(6),
-    if
-    Dice =:= 7 ->
-        moving_robber(CurrentPlayer, Robber);
-    true ->
-        [Hex ! produce || Hex <- Hexes]
-    end.
+    io:format("~w rolled ~w~n", [CurrentPlayer, Dice]),
+    production(Dice, CurrentPlayer, HexNumbering, Robber).
+
+production(7, CurrentPlayer, _, Robber) ->
+    moving_robber(CurrentPlayer, Robber);
+production(Roll, _, HexNumbering, _) ->
+    %% Need a mechanism for assigning die rolls to hexes
+    [Hex ! produce || Hex <- element(Roll, HexNumbering)].
 
 moving_robber(CurrentPlayer, Robber) ->
     CurrentPlayer ! {self(), move, Robber},

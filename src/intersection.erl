@@ -67,7 +67,8 @@ disconnected(Intersections, Paths) ->
     {From, status} when is_pid(From) ->
         From ! disconnected,
         disconnected(Intersections, Paths);
-    _ ->
+    Msg ->
+        io:format("~w received ~w~n", [self(), Msg]),
         disconnected(Intersections, Paths)
     end.
 
